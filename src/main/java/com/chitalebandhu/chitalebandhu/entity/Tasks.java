@@ -1,6 +1,5 @@
 package com.chitalebandhu.chitalebandhu.entity;
 
-import jakarta.persistence.Entity;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDate;

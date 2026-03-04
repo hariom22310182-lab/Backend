@@ -1,6 +1,6 @@
 package com.chitalebandhu.chitalebandhu.entity;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
@@ -8,7 +8,6 @@ import java.time.Instant;
 @Document(collection = "refresh_token")
 public class RefreshToken {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
 
     private String token;
