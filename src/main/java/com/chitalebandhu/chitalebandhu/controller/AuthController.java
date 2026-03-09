@@ -42,18 +42,18 @@ public class AuthController {
     public AuthResponse login(@RequestBody AuthRequest request){
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
-                    request.getUserName(),
+                    request.getUsername(),
                     request.getPassword()
             )
         );
 
-        User user = userRepository.findByUsername(request.getUserName()).get();
+        User user = userRepository.findByUsername(request.getUsername()).get();
 
         String accessToken = jwtUtil.generateAccessToken(user.getUsername(), user.getRole());
 
         String refreshToken = refreshTokenService.createRefreshToken(user.getUsername()).getToken();
 
-        return new AuthResponse(accessToken, refreshToken);
+        return new AuthResponse(accessToken, refreshToken, user.getRole());
     }
 
     @PostMapping("/refresh")
@@ -67,7 +67,7 @@ public class AuthController {
 
         String newAccessToken = jwtUtil.generateAccessToken(user.getUsername(), user.getRole());
 
-        return new AuthResponse(newAccessToken, token.getToken());
+        return new AuthResponse(newAccessToken, token.getToken(), user.getRole());
     }
 
     @PostMapping("/logout")
