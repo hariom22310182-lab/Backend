@@ -21,5 +21,7 @@ public class CBApplication {
 //		 System.out.println("Saved to mongodb "+ m.getName());
 //	 };
 //	}
+
+	//just for fun
 }
 
