@@ -27,7 +27,7 @@ public class MemberService {
     }
 
     public List<Member> getAllMembers(){
-        return memberRepository.findAll();
+        return memberRepository.findByRoleIgnoreCase("USER");
     }
 
     public Member getMemberById(String myId){
