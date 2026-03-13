@@ -115,6 +115,10 @@ public class TaskService {
             task.setProgress(newTask.getProgress());
         }
 
+        if (newTask.getContributionPercent() > 0) {
+            task.setContributionPercent(newTask.getContributionPercent());
+        }
+
         validateTaskForCreateOrUpdate(task);
 
         final Tasks saved = taskRepository.save(task);
@@ -177,10 +181,29 @@ public class TaskService {
             if (!"PROJECT".equals(normalize(parent.getType()))) {
                 throw new IllegalStateException("Parent task must be of type PROJECT");
             }
+
+            int contribution = task.getContributionPercent();
+            if (contribution <= 0 || contribution > 100) {
+                throw new IllegalStateException("Task contribution must be between 1 and 100 percent");
+            }
+
+            List<Tasks> siblings = taskRepository.findByParentTaskId(task.getParentTaskId());
+            int assignedContribution = siblings.stream()
+                    .filter(existing -> task.getId() == null || !task.getId().equals(existing.getId()))
+                    .mapToInt(Tasks::getContributionPercent)
+                    .sum();
+
+            if (assignedContribution + contribution > 100) {
+                throw new IllegalStateException(
+                        "Task contribution exceeds the remaining project percentage. Remaining: "
+                                + Math.max(0, 100 - assignedContribution) + "%"
+                );
+            }
         }
 
         if ("PROJECT".equals(type)) {
             task.setParentTaskId(null);
+            task.setContributionPercent(0);
         }
 
         if (task.getStatus() == null || task.getStatus().trim().isEmpty()) {
@@ -208,16 +231,15 @@ public class TaskService {
         long total = taskRepository.countByParentTaskId(projectId);
         long completed = taskRepository.countByParentTaskIdAndStatusIn(projectId, DONE_STATUSES);
         long remaining = Math.max(0, total - completed);
+        List<Tasks> children = taskRepository.findByParentTaskId(projectId);
+        int completedContribution = children.stream()
+                .filter(child -> DONE_STATUSES.contains(normalize(child.getStatus())))
+                .mapToInt(Tasks::getContributionPercent)
+                .sum();
 
         project.setCompletedTask((int) completed);
         project.setRemainingTask((int) remaining);
-
-        if (total > 0) {
-            short progress = (short) Math.round((completed * 100.0) / total);
-            project.setProgress(progress);
-        } else {
-            project.setProgress((short) 0);
-        }
+        project.setProgress((short) Math.min(100, Math.max(0, completedContribution)));
 
         taskRepository.save(project);
     }
