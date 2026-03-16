@@ -1,7 +1,9 @@
 package com.chitalebandhu.chitalebandhu.controller;
 
+import com.chitalebandhu.chitalebandhu.DTOs.PagedResponse;
 import com.chitalebandhu.chitalebandhu.entity.Tasks;
 import com.chitalebandhu.chitalebandhu.services.TaskService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -77,5 +79,32 @@ public class TaskController {
     @GetMapping("TodoCount/{parentTaskId}/{status}")
     public long getCountTodo(@PathVariable String parentTaskId, @PathVariable String status){
         return taskService.getTaskCountByParentTaskIdAndStatus(parentTaskId, status);
+    }
+
+    // Paginated endpoints
+    @GetMapping("paginated/{type}")
+    public ResponseEntity<PagedResponse<Tasks>> getTasksPaginated(
+            @PathVariable String type,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            Page<Tasks> tasksPage = taskService.getAllTasksByTypePaginated(type, page, size);
+            return new ResponseEntity<>(new PagedResponse<>(tasksPage), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("paginated/owner/{ownerId}")
+    public ResponseEntity<PagedResponse<Tasks>> getTasksByOwnerPaginated(
+            @PathVariable String ownerId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            Page<Tasks> tasksPage = taskService.getTaskByOwnerPaginated(ownerId, page, size);
+            return new ResponseEntity<>(new PagedResponse<>(tasksPage), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 }

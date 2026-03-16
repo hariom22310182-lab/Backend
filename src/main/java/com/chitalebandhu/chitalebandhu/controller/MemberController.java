@@ -1,9 +1,12 @@
 package com.chitalebandhu.chitalebandhu.controller;
 
+import com.chitalebandhu.chitalebandhu.DTOs.PagedResponse;
 import com.chitalebandhu.chitalebandhu.entity.Member;
 import com.chitalebandhu.chitalebandhu.services.MemberService;
 import com.chitalebandhu.chitalebandhu.services.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -60,5 +63,18 @@ public class MemberController {
     public boolean deleteMemberById(@PathVariable String myId){
         memberService.deleteMemberById(myId) ;
         return true;
+    }
+
+    // Paginated endpoint
+    @GetMapping("paginated")
+    public ResponseEntity<PagedResponse<Member>> getMembersPaginated(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            Page<Member> membersPage = memberService.getAllMembersPaginated(page, size);
+            return new ResponseEntity<>(new PagedResponse<>(membersPage), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 }

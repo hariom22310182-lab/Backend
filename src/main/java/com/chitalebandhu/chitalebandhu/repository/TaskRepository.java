@@ -1,6 +1,8 @@
 package com.chitalebandhu.chitalebandhu.repository;
 
 import com.chitalebandhu.chitalebandhu.entity.Tasks;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
@@ -23,4 +25,9 @@ public interface TaskRepository extends MongoRepository<Tasks, String> {
     long countByOwnerIdAndType(String ownerId, String type);
 
     long countByOwnerIdAndStatus(String ownerId, String status);
+
+    // Pagination methods
+    Page<Tasks> findByType(String type, Pageable pageable);
+    Page<Tasks> findByOwnerId(String ownerId, Pageable pageable);
+    Page<Tasks> findByParentTaskId(String parentTaskId, Pageable pageable);
 }

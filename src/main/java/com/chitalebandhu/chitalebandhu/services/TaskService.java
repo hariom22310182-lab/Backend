@@ -3,6 +3,10 @@ package com.chitalebandhu.chitalebandhu.services;
 import com.chitalebandhu.chitalebandhu.entity.Tasks;
 import com.chitalebandhu.chitalebandhu.exceptions.ResourceNotFoundException;
 import com.chitalebandhu.chitalebandhu.repository.TaskRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -160,6 +164,17 @@ public class TaskService {
     public List<Tasks> getAllTasksByType(String type){
         Optional <List<Tasks>> allProjects = taskRepository.findByType(type);
         return allProjects.orElse(List.of());
+    }
+
+    // Pagination methods
+    public Page<Tasks> getAllTasksByTypePaginated(String type, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("_id").descending());
+        return taskRepository.findByType(type, pageable);
+    }
+
+    public Page<Tasks> getTaskByOwnerPaginated(String ownerId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("_id").descending());
+        return taskRepository.findByOwnerId(ownerId, pageable);
     }
 
     private void validateTaskForCreateOrUpdate(Tasks task) {
