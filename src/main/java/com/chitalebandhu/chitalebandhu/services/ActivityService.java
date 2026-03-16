@@ -19,6 +19,10 @@ public class ActivityService {
         activityRepository.save(newActivity);
     }
 
+    public List<Activity> getAllActivities(){
+        return activityRepository.findAllByOrderByTimeDesc();
+    }
+
     public List<Activity> getAdminActivities(String visibility){
         return activityRepository.findByVisibilityOrderByTimeDesc(visibility);
     }

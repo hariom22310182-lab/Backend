@@ -36,6 +36,11 @@ public class ActivityController {
         return activityService.getAdminActivities("PROJECT");
     }
 
+    @GetMapping("activities")
+    public List<Activity> getAllActivities(){
+        return activityService.getAllActivities();
+    }
+
     @PostMapping("add")
     public void addActivity(@RequestBody Activity newActivity){
         activityService.addActivity(newActivity);

@@ -56,9 +56,15 @@ public class TaskController {
 
     @PutMapping("update/{Id}")
     public ResponseEntity<Tasks> updateTask(@PathVariable String Id, @RequestBody Tasks newTask){
-       Tasks task =  taskService.updateTaskById(Id, newTask);
-       if(task != null) return new  ResponseEntity<>(task , HttpStatus.OK);
-       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        try {
+            Tasks task = taskService.updateTaskById(Id, newTask);
+            if(task != null) return new ResponseEntity<>(task , HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IllegalStateException e) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
     @DeleteMapping("delete/{Id}")
@@ -67,8 +73,15 @@ public class TaskController {
     }
 
     @PutMapping("{id}/status/update/{status}")
-    public void updateStatus(@PathVariable String id, @PathVariable String status){
-        taskService.updateStatusById(id, status);
+    public ResponseEntity<Void> updateStatus(@PathVariable String id, @PathVariable String status){
+        try {
+            taskService.updateStatusById(id, status);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (IllegalStateException e) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PutMapping("{id}/status/transition/{status}")

@@ -1,8 +1,12 @@
 package com.chitalebandhu.chitalebandhu.services;
 
 import com.chitalebandhu.chitalebandhu.entity.Tasks;
+import com.chitalebandhu.chitalebandhu.entity.Activity;
+import com.chitalebandhu.chitalebandhu.entity.Member;
 import com.chitalebandhu.chitalebandhu.exceptions.ResourceNotFoundException;
 import com.chitalebandhu.chitalebandhu.repository.TaskRepository;
+import com.chitalebandhu.chitalebandhu.repository.ActivityRepository;
+import com.chitalebandhu.chitalebandhu.repository.MemberRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,9 +26,17 @@ public class TaskService {
     private static final List<String> DONE_STATUSES = Arrays.asList("DONE", "COMPLETED");
 
     private final TaskRepository taskRepository;
+    private final ActivityRepository activityRepository;
+    private final MemberRepository memberRepository;
 
-    public TaskService(TaskRepository taskRepository) {
+    public TaskService(
+            TaskRepository taskRepository,
+            ActivityRepository activityRepository,
+            MemberRepository memberRepository
+    ) {
         this.taskRepository = taskRepository;
+        this.activityRepository = activityRepository;
+        this.memberRepository = memberRepository;
     }
 
     public void addTask(Tasks task){
@@ -84,6 +96,10 @@ public class TaskService {
         }
 
         if (newTask.getStatus() != null && !newTask.getStatus().trim().isEmpty()) {
+            final String requestedStatus = normalize(newTask.getStatus());
+            if (DONE_STATUSES.contains(requestedStatus)) {
+                throw new IllegalStateException("Direct DONE update is blocked. Use /tasks/{id}/status/transition/DONE");
+            }
             task.setStatus(newTask.getStatus());
         }
 
@@ -144,6 +160,11 @@ public class TaskService {
     }
 
     public void updateStatusById(String id, String status){
+        final String requestedStatus = normalize(status);
+        if (DONE_STATUSES.contains(requestedStatus)) {
+            throw new IllegalStateException("Direct DONE update is blocked. Use /tasks/{id}/status/transition/DONE");
+        }
+
         Optional<Tasks> existingTask = taskRepository.findById(id);
         if(existingTask.isPresent()){
             existingTask.get().setStatus(status);
@@ -181,6 +202,7 @@ public class TaskService {
             }
 
             task.setStatus("REVIEW");
+            createTransitionActivity(task, actorId, "submitted for review in");
         } else if (DONE_STATUSES.contains(nextStatus)) {
             // Completion is allowed only from REVIEW and only by project owner or admin.
             if (!"REVIEW".equals(currentStatus)) {
@@ -202,6 +224,7 @@ public class TaskService {
             }
 
             task.setStatus("DONE");
+            createTransitionActivity(task, actorId, "approved completion for");
         } else {
             throw new IllegalStateException("Unsupported transition status: " + nextStatus + ". Use REVIEW or DONE.");
         }
@@ -348,5 +371,56 @@ public class TaskService {
 
     private String normalize(String value) {
         return value == null ? "" : value.trim().toUpperCase();
+    }
+
+    private void createTransitionActivity(Tasks task, String actorId, String verb) {
+        try {
+            Activity activity = new Activity();
+
+            String projectId = task.getParentTaskId();
+            String projectName = task.getTitle();
+
+            if (projectId != null && !projectId.trim().isEmpty()) {
+                Optional<Tasks> projectOpt = taskRepository.findById(projectId);
+                if (projectOpt.isPresent()) {
+                    Tasks project = projectOpt.get();
+                    projectName = project.getTitle();
+                }
+            } else if ("PROJECT".equals(normalize(task.getType()))) {
+                projectId = task.getId();
+            }
+
+            activity.setProjectId(projectId);
+            activity.setProjectName(projectName);
+            activity.setVerb(verb);
+            activity.setUserName(resolveActorName(actorId));
+            activity.setVisibility("PROJECT");
+            activity.setTime();
+
+            activityRepository.save(activity);
+        } catch (Exception ignored) {
+            // Activity logging should not block the primary transition flow.
+        }
+    }
+
+    private String resolveActorName(String actorId) {
+        if (actorId == null || actorId.trim().isEmpty()) {
+            return "Unknown";
+        }
+
+        Optional<Member> memberById = memberRepository.findById(actorId);
+        if (memberById.isPresent() && memberById.get().getName() != null
+                && !memberById.get().getName().trim().isEmpty()) {
+            return memberById.get().getName();
+        }
+
+        // Fallback for flows currently sending username/email instead of member id.
+        return memberRepository.findAll()
+                .stream()
+                .filter(m -> m.getEmail() != null && m.getEmail().equalsIgnoreCase(actorId))
+                .map(Member::getName)
+                .filter(name -> name != null && !name.trim().isEmpty())
+                .findFirst()
+                .orElse(actorId);
     }
 }
