@@ -3,6 +3,7 @@ package com.chitalebandhu.chitalebandhu.controller;
 import com.chitalebandhu.chitalebandhu.DTOs.PagedResponse;
 import com.chitalebandhu.chitalebandhu.entity.Tasks;
 import com.chitalebandhu.chitalebandhu.services.TaskService;
+import com.chitalebandhu.chitalebandhu.services.OverdueSchedulerService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +17,11 @@ import java.util.List;
 public class TaskController {
 
     private final TaskService taskService;
+    private final OverdueSchedulerService overdueSchedulerService;
 
-    public TaskController(TaskService taskService) {
+    public TaskController(TaskService taskService, OverdueSchedulerService overdueSchedulerService) {
         this.taskService = taskService;
+        this.overdueSchedulerService = overdueSchedulerService;
     }
 
     @GetMapping("count/{priority}")
@@ -42,6 +45,11 @@ public class TaskController {
         }catch (Exception e){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @PutMapping("id/{id}/updateProgress")
+    public void updateProgress(@PathVariable String id, @RequestBody short progress){
+        taskService.updateProgress(id, progress);
     }
 
     @GetMapping("id/{id}")
@@ -135,6 +143,16 @@ public class TaskController {
             return new ResponseEntity<>(new PagedResponse<>(tasksPage), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("check-overdue")
+    public ResponseEntity<String> checkOverdueTasks() {
+        try {
+            overdueSchedulerService.markOverdueTasks();
+            return new ResponseEntity<>("Overdue check completed", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Failed to check overdue tasks", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
