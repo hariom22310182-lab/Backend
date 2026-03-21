@@ -47,6 +47,11 @@ public class TaskController {
         }
     }
 
+    @PutMapping("id/{id}/updateProgress")
+    public void updateProgress(@PathVariable String id, @RequestBody short progress){
+        taskService.updateProgress(id, progress);
+    }
+
     @GetMapping("id/{id}")
     public ResponseEntity<Tasks> getTaskById(@PathVariable String id){
         try{

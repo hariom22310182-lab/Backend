@@ -77,6 +77,18 @@ public class TaskService {
         }
     }
 
+    public Tasks updateProgress(String id, short progress){
+        Optional <Tasks> task = taskRepository.findById(id);
+        if(task.isPresent()){
+            task.get().setProgress(progress);
+            taskRepository.save(task.get());
+        }
+        else{
+            throw new ResourceNotFoundException("Task not found with id : " + id);
+        }
+        return null;
+    }
+
     public Tasks updateTaskById(String id, Tasks newTask) {
         Optional<Tasks> existingTask = taskRepository.findById(id);
 
