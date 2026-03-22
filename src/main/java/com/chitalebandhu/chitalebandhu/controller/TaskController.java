@@ -135,7 +135,7 @@ public class TaskController {
         }
     }
 
-    @GetMapping("paginated/{rootType")
+    @GetMapping("paginated/{rootType}")
     public ResponseEntity<PagedResponse<Tasks>> getTasksByRootType(@PathVariable String rootType, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
         try {
             Page<Tasks> tasksPage = taskService.getAllTasksByRootTypePaginated(rootType, page, size);
