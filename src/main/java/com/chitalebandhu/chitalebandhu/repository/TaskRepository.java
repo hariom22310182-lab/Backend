@@ -29,6 +29,7 @@ public interface TaskRepository extends MongoRepository<Tasks, String> {
 
     // Pagination methods
     Page<Tasks> findByType(String type, Pageable pageable);
+    Page<Tasks> findByRootType(String type, Pageable pageable);
     Page<Tasks> findByOwnerId(String ownerId, Pageable pageable);
     Page<Tasks> findByParentTaskId(String parentTaskId, Pageable pageable);
 

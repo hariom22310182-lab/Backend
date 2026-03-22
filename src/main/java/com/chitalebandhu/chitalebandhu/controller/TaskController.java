@@ -4,6 +4,7 @@ import com.chitalebandhu.chitalebandhu.DTOs.PagedResponse;
 import com.chitalebandhu.chitalebandhu.entity.Tasks;
 import com.chitalebandhu.chitalebandhu.services.TaskService;
 import com.chitalebandhu.chitalebandhu.services.OverdueSchedulerService;
+import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,7 @@ public class TaskController {
     public long getCountByPriority(@PathVariable String priority){
         return taskService.getCountByPriority(priority);
     }
+
 
     @GetMapping("allTasks/{type}")
     public List<Tasks> getAllProject(@PathVariable String type){return taskService.getAllTasksByType(type);}
@@ -129,6 +131,17 @@ public class TaskController {
             Page<Tasks> tasksPage = taskService.getAllTasksByTypePaginated(type, page, size);
             return new ResponseEntity<>(new PagedResponse<>(tasksPage), HttpStatus.OK);
         } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("paginated/{rootType}")
+    public ResponseEntity<PagedResponse<Tasks>> getTasksByRootType(@PathVariable String rootType, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+        try {
+            Page<Tasks> tasksPage = taskService.getAllTasksByRootTypePaginated(rootType, page, size);
+            return new ResponseEntity<>(new PagedResponse<>(tasksPage), HttpStatus.OK);
+        }
+        catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }

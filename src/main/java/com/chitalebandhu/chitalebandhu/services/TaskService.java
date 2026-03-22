@@ -263,6 +263,11 @@ public class TaskService {
         return taskRepository.findByType(type, pageable);
     }
 
+    public Page<Tasks> getAllTasksByRootTypePaginated(String rootType, int page, int size){
+        Pageable pageable = PageRequest.of(page, size, Sort.by("_id").descending());
+        return taskRepository.findByRootType(rootType, pageable);
+    }
+
     public Page<Tasks> getTaskByOwnerPaginated(String ownerId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("_id").descending());
         return taskRepository.findByOwnerId(ownerId, pageable);
