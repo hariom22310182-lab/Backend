@@ -207,7 +207,6 @@ public class TaskService {
         final String nextStatus = normalize(status);
         final String currentStatus = normalize(task.getStatus());
         final String role = normalize(actorRole);
-        final boolean isAdmin = "ADMIN".equals(role);
 
         if (nextStatus.isEmpty()) {
             throw new IllegalStateException("Status is required");
@@ -215,13 +214,6 @@ public class TaskService {
 
         // Task owner can only move to REVIEW. It cannot self-complete to DONE.
         if ("REVIEW".equals(nextStatus)) {
-            if (!isAdmin && (actorId == null || actorId.trim().isEmpty() || !actorId.equals(task.getOwnerId()))) {
-                throw new IllegalStateException("Only task owner can submit task for review");
-            }
-
-            if (DONE_STATUSES.contains(currentStatus)) {
-                throw new IllegalStateException("Completed tasks cannot be moved back to review");
-            }
 
             task.setStatus("REVIEW");
             createTransitionActivity(task, actorId, "submitted for review in");
@@ -229,20 +221,6 @@ public class TaskService {
             // Completion is allowed only from REVIEW and only by project owner or admin.
             if (!"REVIEW".equals(currentStatus)) {
                 throw new IllegalStateException("Task must be in REVIEW before marking DONE");
-            }
-
-            if (!isAdmin) {
-                String parentTaskId = task.getParentTaskId();
-                if (parentTaskId == null || parentTaskId.trim().isEmpty()) {
-                    throw new IllegalStateException("Task is missing parent project");
-                }
-
-                Tasks project = taskRepository.findById(parentTaskId)
-                        .orElseThrow(() -> new ResourceNotFoundException("Parent project not found with id: " + parentTaskId));
-
-                if (actorId == null || actorId.trim().isEmpty() || !actorId.equals(project.getOwnerId())) {
-                    throw new IllegalStateException("Only project owner can approve task completion");
-                }
             }
 
             task.setStatus("DONE");
@@ -420,7 +398,14 @@ public class TaskService {
             activity.setProjectName(projectName);
             activity.setVerb(verb);
             activity.setUserName(resolveActorName(actorId));
-            activity.setVisibility("PROJECT");
+            if("PROJECT".equals(normalize(task.getType()))){
+                activity.setVisibility("PROJECT");
+            }
+            else{
+                if("TASK".equals(normalize(task.getType()))){
+                    activity.setVisibility("TASK");
+                }
+            }
             activity.setTime();
 
             activityRepository.save(activity);
