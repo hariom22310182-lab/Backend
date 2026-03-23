@@ -294,7 +294,7 @@ public class TaskService {
             }
 
             int contribution = task.getContributionPercent();
-            if (contribution <= 0 || contribution > 100) {
+            if (contribution < 0 || contribution > 100) {
                 throw new IllegalStateException("Task contribution must be between 1 and 100 percent");
             }
 
