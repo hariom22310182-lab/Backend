@@ -24,7 +24,7 @@ public class Tasks {
     private String type; // Here type we assign as PROJECT / TASK
     private String status; // NOT_STARTED / IN_PROGRESS / DONE / OVERDUE
     private String ownerId;
-    private String parentTaskId;
+    private String parentId;
 
     private List<String> collaboratedProjects = new ArrayList<>();
     private List<String> dependencies;
@@ -111,11 +111,11 @@ public class Tasks {
     }
 
     public String getParentTaskId() {
-        return parentTaskId;
+        return parentId;
     }
 
-    public void setParentTaskId(String parentTaskId) {
-        this.parentTaskId = parentTaskId;
+    public void setParentTaskId(String parentId) {
+        this.parentId = parentId;
     }
 
     public LocalDate getStartDate() {
@@ -165,9 +165,6 @@ public class Tasks {
     public void setContributionPercent(int contributionPercent) {
         this.contributionPercent = contributionPercent;
     }
-
-
-
 
     public String getCategory() {
         return category;

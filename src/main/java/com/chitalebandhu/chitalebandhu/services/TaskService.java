@@ -49,6 +49,10 @@ public class TaskService {
         }
     }
 
+    public List<Tasks> getTasksByParentId(String id){
+        return taskRepository.findByParentId(id);
+    }
+
     public Tasks getTaskById(String id){
         return taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Task not found"));
@@ -92,8 +96,13 @@ public class TaskService {
 
     public void toggleType(String id){
         Optional<Tasks> existingTask = taskRepository.findById(id);
-        existingTask.get().setIsProject(true);
-        taskRepository.save(existingTask.get());
+        if(existingTask.isPresent()){
+            existingTask.get().setIsProject(true);
+            taskRepository.save(existingTask.get());
+        }
+        else{
+            throw new RuntimeException("Task not found");
+        }
     }
 
     public Tasks updateTaskById(String id, Tasks newTask) {
@@ -342,7 +351,7 @@ public class TaskService {
         long total = taskRepository.countByParentTaskId(projectId);
         long completed = taskRepository.countByParentTaskIdAndStatusIn(projectId, DONE_STATUSES);
         long remaining = Math.max(0, total - completed);
-        List<Tasks> children = taskRepository.findByParentTaskId(projectId);
+        List<Tasks> children = taskRepository.findByParentId(projectId);
         int completedContribution = children.stream()
                 .filter(child -> DONE_STATUSES.contains(normalize(child.getStatus())))
                 .mapToInt(Tasks::getContributionPercent)
@@ -366,7 +375,7 @@ public class TaskService {
 
         while (!queue.isEmpty()) {
             String parentId = queue.removeFirst();
-            List<Tasks> children = taskRepository.findByParentTaskId(parentId);
+            List<Tasks> children = taskRepository.findByParentId(parentId);
             if (children.isEmpty()) {
                 continue;
             }

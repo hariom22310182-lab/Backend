@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -46,8 +47,6 @@ public class TaskController {
     public List<Tasks> getAllProjects(){
         return taskService.getAllProjects();
     }
-
-
 
     @GetMapping("member/{ownerId}")
     public ResponseEntity<List<Tasks>> getTaskByOwner(@PathVariable String ownerId){
@@ -99,9 +98,17 @@ public class TaskController {
         }
     }
 
+    @GetMapping("{id}/tasks")
+    public List<Tasks> getTasksByParentId(@PathVariable String id){
+        return taskService.getTasksByParentId(id);
+    }
+
     @DeleteMapping("delete/{Id}")
-    public void deleteTask(@PathVariable String Id){
-        taskService.deleteTaskById(Id);
+    public void deleteTask(@PathVariable String id){
+        List<Tasks> children = getTasksByParentId(id);
+        for(int i = 0; i < children.size(); i++){
+            taskService.deleteTaskById(children.get(i).getId());
+        }
     }
 
     @PutMapping("{id}/status/update/{status}")
