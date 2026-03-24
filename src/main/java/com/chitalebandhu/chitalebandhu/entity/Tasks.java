@@ -28,14 +28,6 @@ public class Tasks {
 
     private List<String> collaboratedProjects = new ArrayList<>();
     private List<String> dependencies;
-
-    // We'll be assigning levels to each project and task we create, project (with no parent) will be root (with level = 0)
-    // When we create task within a project we'll assign task's level = parent level + 1
-    // same within task, when we add task within a task, we'll asign the subtask level = parent task level + 1
-    // The add task button will be conditioned by this level, if current task level == 2 then do not show add button
-    // if current task level is less than 2 then show add button
-    // this controls the branching depth
-    private short level;
     private short progress; // out of 100 (it'll be represented as percentage)
     @JsonProperty("contributionPercent")
     @JsonAlias({"contribution", "contribution_percentage"})
@@ -180,14 +172,6 @@ public class Tasks {
 
     public void setCriticalDays(int criticalDays) {
         this.criticalDays = criticalDays;
-    }
-
-    public short getLevel() {
-        return level;
-    }
-
-    public void setLevel(short level) {
-        this.level = level;
     }
 
     public boolean getIsProject() {

@@ -32,7 +32,9 @@ public class CategoryService {
     public void updateCategory(String id, String newCategory){
         Optional<Category> existingCategory = categoryRepository.findById(id);
         if(existingCategory.isPresent()){
-            existingCategory.get().setCategory(newCategory);
+            Category category = existingCategory.get();
+            category.setCategory(newCategory);
+            categoryRepository.save(category);
         }
         else{
             throw new RuntimeException("Category not found");
@@ -40,12 +42,6 @@ public class CategoryService {
     }
 
     public List<Category> getCategories(){
-       List<Category> categories = categoryRepository.findAll();
-       if(categories.isEmpty()){
-           throw new RuntimeException("No categories present");
-       }
-       else{
-           return categories;
-       }
+       return categoryRepository.findAll();
     }
 }

@@ -4,7 +4,6 @@ import com.chitalebandhu.chitalebandhu.DTOs.PagedResponse;
 import com.chitalebandhu.chitalebandhu.entity.Tasks;
 import com.chitalebandhu.chitalebandhu.services.TaskService;
 import com.chitalebandhu.chitalebandhu.services.OverdueSchedulerService;
-import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -106,8 +104,8 @@ public class TaskController {
     @DeleteMapping("delete/{Id}")
     public void deleteTask(@PathVariable String id){
         List<Tasks> children = getTasksByParentId(id);
-        for(int i = 0; i < children.size(); i++){
-            taskService.deleteTaskById(children.get(i).getId());
+        for (Tasks child : children) {
+            taskService.deleteTaskById(child.getId());
         }
     }
 
@@ -157,10 +155,10 @@ public class TaskController {
 
             List<Tasks> projects  = new ArrayList<>();
 
-            for (int i = 0 ; i < projectIds.size() ; i++){
-                Tasks temp =  taskService.getTaskById(projectIds.get(i));
-                projects.add(temp);
-            }
+        for (String projectId : projectIds) {
+            Tasks temp = taskService.getTaskById(projectId);
+            projects.add(temp);
+        }
             return projects;
     }
 
