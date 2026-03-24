@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @CrossOrigin(origins = "*")
@@ -41,6 +42,12 @@ public class TaskController {
         }
         taskService.addTask(task);
     }
+    @GetMapping("projects")
+    public List<Tasks> getAllProjects(){
+        return taskService.getAllProjects();
+    }
+
+
 
     @GetMapping("member/{ownerId}")
     public ResponseEntity<List<Tasks>> getTaskByOwner(@PathVariable String ownerId){
@@ -126,7 +133,7 @@ public class TaskController {
         }
     }
 
-    @GetMapping("dependency/add/{id}")
+    @PostMapping("dependency/add/{id}")
     public void addDependency(@PathVariable String id, @RequestBody String projectId){
         taskService.addDependency(id, projectId);
     }
@@ -136,10 +143,25 @@ public class TaskController {
         taskService.removeDependency(id, projectId);
     }
 
-    @GetMapping("collaboratedProject/add/{id}")
-    public void addCollaboratedProject(@PathVariable String id, @RequestBody String projectId){
-        taskService.removeCollaboratedProject(id, projectId);
+    @GetMapping("getCollaboratedProject/{id}")
+    public List<Tasks> getCollaboration(@PathVariable String id){
+            Tasks task = taskService.getTaskById(id);
+            List<String> projectIds =  task.getCollaboratedProjects();
+
+            List<Tasks> projects  = new ArrayList<>();
+
+            for (int i = 0 ; i < projectIds.size() ; i++){
+                Tasks temp =  taskService.getTaskById(projectIds.get(i));
+                projects.add(temp);
+            }
+            return projects;
     }
+
+    @PostMapping("collaboratedProject/add/{id}")
+    public void addCollaboratedProject(@PathVariable String id, @RequestBody String projectId){
+        taskService.addColaboratedProject(id, projectId);
+    }
+
 
     @DeleteMapping("collaboratedProject/remove/{id}")
     public void removeCollaboratedProject(@PathVariable String id, @RequestBody String projectId){

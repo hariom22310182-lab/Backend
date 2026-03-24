@@ -17,6 +17,9 @@ public interface TaskRepository extends MongoRepository<Tasks, String> {
     long countByParentTaskId(String parentTaskId);
     long countByParentTaskIdAndStatusIn(String parentTaskId, List<String> statuses);
 
+    Optional <List<Tasks>> findByTypeOrIsProject(String Type , boolean isProject);
+
+
     long countByType(String type);
 
     long countByPriority(String priority);

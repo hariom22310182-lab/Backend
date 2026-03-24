@@ -236,6 +236,17 @@ public class TaskService {
 
         return saved;
     }
+    public List<Tasks> getAllProjects(){
+     Optional<List<Tasks>> tasks = taskRepository.findByTypeOrIsProject("PROJECT" , true);
+
+     if(tasks.isPresent()){
+         return tasks.get();
+     }else {
+         throw  new ResourceNotFoundException("No projects found");
+     }
+
+    }
+
 
     public long getAllTaskCountByType(String type){
         return taskRepository.countByType(type);

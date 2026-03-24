@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Document(collection = "tasks")
@@ -25,7 +26,7 @@ public class Tasks {
     private String ownerId;
     private String parentTaskId;
 
-    private List<String> collaboratedProjects;
+    private List<String> collaboratedProjects = new ArrayList<>();
     private List<String> dependencies;
 
     // We'll be assigning levels to each project and task we create, project (with no parent) will be root (with level = 0)
