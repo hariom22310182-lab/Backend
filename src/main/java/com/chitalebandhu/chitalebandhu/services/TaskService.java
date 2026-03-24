@@ -261,7 +261,7 @@ public class TaskService {
         return taskRepository.findByOwnerId(ownerId, pageable);
     }
 
-//    private void validateTaskForCreateOrUpdate(Tasks task) {
+//    public void validateTaskForCreateOrUpdate(Tasks task) {
 //        final String type = normalize(task.getType());
 //        if (type.isEmpty()) {
 //            throw new IllegalStateException("Task type is required (PROJECT or TASK)");
@@ -313,7 +313,7 @@ public class TaskService {
 //        }
 //    }
 
-    private void recalculateProjectStats(String projectId) {
+    public void recalculateProjectStats(String projectId) {
         if (projectId == null || projectId.trim().isEmpty()) {
             return;
         }
@@ -344,7 +344,7 @@ public class TaskService {
         taskRepository.save(project);
     }
 
-    private void deleteDescendantsByParentId(String rootParentId) {
+    public void deleteDescendantsByParentId(String rootParentId) {
         if (rootParentId == null || rootParentId.trim().isEmpty()) {
             return;
         }
@@ -373,11 +373,55 @@ public class TaskService {
         }
     }
 
-    private String normalize(String value) {
+    public void addColaboratedProject(String id, String projectId){
+        Optional <Tasks> existingTask = taskRepository.findById(id);
+        if(existingTask.isPresent()){
+            existingTask.get().addCollaboratedProjects(projectId);
+            taskRepository.save(existingTask.get());
+        }
+        else{
+            throw new RuntimeException("Task / Project doesn't exist");
+        }
+    }
+
+    public void removeCollaboratedProject(String id, String projectId){
+        Optional <Tasks> existingTask = taskRepository.findById(id);
+        if(existingTask.isPresent()){
+            existingTask.get().removeCollaboratedProjects(projectId);
+            taskRepository.save(existingTask.get());
+        }
+        else{
+            throw new RuntimeException("Task / Project doesn't exist");
+        }
+    }
+
+    public void addDependency(String id, String projectId){
+        Optional <Tasks> existingTask = taskRepository.findById(id);
+        if(existingTask.isPresent()){
+            existingTask.get().addDependencies(projectId);
+            taskRepository.save(existingTask.get());
+        }
+        else{
+            throw new RuntimeException("Task / Project doesn't exist");
+        }
+    }
+
+    public void removeDependency(String id, String projectId){
+        Optional <Tasks> existingTask = taskRepository.findById(id);
+        if(existingTask.isPresent()){
+            existingTask.get().removeDependencies(projectId);
+            taskRepository.save(existingTask.get());
+        }
+        else{
+            throw new RuntimeException("Task / Project doesn't exist");
+        }
+    }
+
+    public String normalize(String value) {
         return value == null ? "" : value.trim().toUpperCase();
     }
 
-    private void createTransitionActivity(Tasks task, String actorId, String verb) {
+    public void createTransitionActivity(Tasks task, String actorId, String verb) {
         try {
             Activity activity = new Activity();
 
@@ -414,7 +458,7 @@ public class TaskService {
         }
     }
 
-    private String resolveActorName(String actorId) {
+    public String resolveActorName(String actorId) {
         if (actorId == null || actorId.trim().isEmpty()) {
             return "Unknown";
         }

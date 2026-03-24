@@ -126,6 +126,26 @@ public class TaskController {
         }
     }
 
+    @GetMapping("dependency/add/{id}")
+    public void addDependency(@PathVariable String id, @RequestBody String projectId){
+        taskService.addDependency(id, projectId);
+    }
+
+    @DeleteMapping("dependency/remove/{id}")
+    public void removeDependency(@PathVariable String id, @RequestBody String projectId){
+        taskService.removeDependency(id, projectId);
+    }
+
+    @GetMapping("collaboratedProject/add/{id}")
+    public void addCollaboratedProject(@PathVariable String id, @RequestBody String projectId){
+        taskService.removeCollaboratedProject(id, projectId);
+    }
+
+    @DeleteMapping("collaboratedProject/remove/{id}")
+    public void removeCollaboratedProject(@PathVariable String id, @RequestBody String projectId){
+        taskService.removeCollaboratedProject(id, projectId);
+    }
+
     @GetMapping("TaskCount/{type}")
     public long getAllTaskCount(@PathVariable String type){
         return taskService.getAllTaskCountByType(type);

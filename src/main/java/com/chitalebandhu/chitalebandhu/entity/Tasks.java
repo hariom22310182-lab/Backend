@@ -25,6 +25,9 @@ public class Tasks {
     private String ownerId;
     private String parentTaskId;
 
+    private List<String> collaboratedProjects;
+    private List<String> dependencies;
+
     // We'll be assigning levels to each project and task we create, project (with no parent) will be root (with level = 0)
     // When we create task within a project we'll assign task's level = parent level + 1
     // same within task, when we add task within a task, we'll asign the subtask level = parent task level + 1
@@ -195,5 +198,29 @@ public class Tasks {
 
     public void setIsProject(boolean project) {
         isProject = project;
+    }
+
+    public List<String> getCollaboratedProjects() {
+        return collaboratedProjects;
+    }
+
+    public void addCollaboratedProjects(String id) {
+        collaboratedProjects.add(id);
+    }
+
+    public void removeCollaboratedProjects(String id){
+        collaboratedProjects.remove(id);
+    }
+
+    public List<String> getDependencies() {
+        return dependencies;
+    }
+
+    public void addDependencies(String id) {
+        dependencies.add(id);
+    }
+
+    public void removeDependencies(String id){
+        dependencies.remove(id);
     }
 }
