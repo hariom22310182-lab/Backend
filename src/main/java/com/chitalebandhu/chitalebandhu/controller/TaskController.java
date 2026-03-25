@@ -77,10 +77,7 @@ public class TaskController {
         taskService.toggleType(id);
     }
 
-    @GetMapping("{id}/tasks")
-    public List<Tasks> getTasksByParentId(@PathVariable String id){
-        return taskService.getTasksByParentId(id);
-    }
+
 
     @DeleteMapping("delete/{id}")
     public void deleteTask(@PathVariable("id") String id){
