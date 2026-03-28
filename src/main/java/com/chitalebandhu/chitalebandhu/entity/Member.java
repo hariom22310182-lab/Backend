@@ -3,6 +3,9 @@ package com.chitalebandhu.chitalebandhu.entity;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Document(collection = "members")
 public class Member {
     @Id
@@ -11,6 +14,7 @@ public class Member {
     private String email;
     private String mobileNo;
     private String role;
+    private List<Notification> notifications = new ArrayList<>();
 
     public String getEmail() {
         return email;
@@ -50,5 +54,17 @@ public class Member {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public List<Notification> getNotifications() {
+        return notifications;
+    }
+
+    public void addNotification(Notification newNotification) {
+        notifications.add(newNotification);
+    }
+
+    public void removeNotification(Notification notification){
+        notifications.remove(notification);
     }
 }

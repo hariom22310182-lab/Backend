@@ -2,6 +2,7 @@ package com.chitalebandhu.chitalebandhu.controller;
 
 import com.chitalebandhu.chitalebandhu.DTOs.PagedResponse;
 import com.chitalebandhu.chitalebandhu.entity.Member;
+import com.chitalebandhu.chitalebandhu.entity.Notification;
 import com.chitalebandhu.chitalebandhu.services.MemberService;
 import com.chitalebandhu.chitalebandhu.services.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,21 @@ public class MemberController {
     @GetMapping("count/{type}/{ownerId}")
     public long getProjectCount(@PathVariable String ownerId, @PathVariable String type){
         return memberService.getProjectCount(ownerId, type);
+    }
+
+    @GetMapping("notification/{memberId}")
+    public List<Notification> getNotification(@PathVariable String memberId){
+        return memberService.getNotification(memberId);
+    }
+
+    @PutMapping("notification/add/{memberId}")
+    public void addNotification(@PathVariable String memberId, @RequestBody Notification notification){
+        memberService.addNotification(memberId, notification);
+    }
+
+    @DeleteMapping("notification/remove/{memberId}")
+    public void removeNotification(@PathVariable String memberId, @RequestBody Notification notification){
+        memberService.removeNotification(memberId, notification);
     }
 
     @GetMapping("{ownerId}/projects/{status}/count")

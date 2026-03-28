@@ -1,6 +1,7 @@
 package com.chitalebandhu.chitalebandhu.services;
 
 import com.chitalebandhu.chitalebandhu.entity.Member;
+import com.chitalebandhu.chitalebandhu.entity.Notification;
 import com.chitalebandhu.chitalebandhu.entity.Tasks;
 import com.chitalebandhu.chitalebandhu.exceptions.ResourceNotFoundException;
 import com.chitalebandhu.chitalebandhu.repository.MemberRepository;
@@ -93,6 +94,22 @@ public class MemberService {
 
     public long getStatusCount(String ownerId, String status){
         return taskRepository.countByOwnerIdAndStatus(ownerId, status);
+    }
+
+    public void addNotification(String ownerId, Notification notification){
+        Member member = getMemberById(ownerId);
+        member.addNotification(notification);
+        memberRepository.save(member);
+    }
+
+    public List<Notification> getNotification(String ownerId){
+        return getMemberById(ownerId).getNotifications();
+    }
+
+    public void removeNotification(String ownerId, Notification notification){
+        Member member = getMemberById(ownerId);
+        member.removeNotification(notification);
+        memberRepository.save(member);
     }
 
     public Member updateMemberById(String myId, Member newMember){
