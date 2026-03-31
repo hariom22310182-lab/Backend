@@ -7,36 +7,57 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Remark {
+
     @Id
     private String id;
+
     private String senderName;
     private String senderId;
-    // use mentionedUserId to only notify the receiver, no other use ig
+
     private List<String> mentionedUserId = new ArrayList<>();
+
     private String message;
     private LocalDateTime time;
+
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getSenderId() {
         return senderId;
     }
 
-    public void setSenderId(String senderName) {
-        this.senderId = senderName;
+    // 🔥 FIXED HERE
+    public void setSenderId(String senderId) {
+        this.senderId = senderId;
+    }
+
+    public String getSenderName() {
+        return senderName;
+    }
+
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
     }
 
     public List<String> getMentionedUserId() {
         return mentionedUserId;
     }
 
-    public void setMentionedUserId(List<String> mentionedUserId){
+    public void setMentionedUserId(List<String> mentionedUserId) {
         this.mentionedUserId = mentionedUserId;
     }
 
-    public void addMentionedUserId(String userId){
+    public void addMentionedUserId(String userId) {
         mentionedUserId.add(userId);
     }
 
-    public void removeMentionedId(String userId){
+    public void removeMentionedId(String userId) {
         mentionedUserId.remove(userId);
     }
 
@@ -54,21 +75,5 @@ public class Remark {
 
     public void setTime(LocalDateTime time) {
         this.time = time;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getSenderName() {
-        return senderName;
-    }
-
-    public void setSenderName(String senderName) {
-        this.senderName = senderName;
     }
 }

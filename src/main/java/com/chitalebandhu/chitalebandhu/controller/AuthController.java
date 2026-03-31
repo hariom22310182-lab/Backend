@@ -5,8 +5,10 @@ import com.chitalebandhu.chitalebandhu.DTOs.AuthResponse;
 import com.chitalebandhu.chitalebandhu.DTOs.ChangePasswordRequest;
 import com.chitalebandhu.chitalebandhu.DTOs.RefreshRequest;
 import com.chitalebandhu.chitalebandhu.Utility.JwtUtil;
+import com.chitalebandhu.chitalebandhu.entity.Member;
 import com.chitalebandhu.chitalebandhu.entity.RefreshToken;
 import com.chitalebandhu.chitalebandhu.entity.User;
+import com.chitalebandhu.chitalebandhu.repository.MemberRepository;
 import com.chitalebandhu.chitalebandhu.repository.UserRepository;
 import com.chitalebandhu.chitalebandhu.services.RefreshTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/auth")
@@ -24,6 +28,9 @@ public class AuthController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -55,7 +62,14 @@ public class AuthController {
             User user = userRepository.findByUsername(request.getUsername()).get();
             String accessToken = jwtUtil.generateAccessToken(user.getUsername(), user.getRole());
             String refreshToken = refreshTokenService.createRefreshToken(user.getUsername()).getToken();
-            return new AuthResponse(accessToken, refreshToken, user.getRole());
+
+            Optional<Member> member = memberRepository.findByEmail(request.getUsername());
+            if(member.isPresent()){
+                return new AuthResponse(accessToken, refreshToken, user.getRole() ,member.get().getId());
+            }
+
+            System.out.println("sending usr id " + user.getId());
+            return new AuthResponse(accessToken, refreshToken, user.getRole() ,user.getId());
         }
         return null;
     }
@@ -72,7 +86,7 @@ public class AuthController {
         if(userRepository.findById(token.getUser()).isPresent()){
             User user = userRepository.findById(token.getUser()).get();
         String newAccessToken = jwtUtil.generateAccessToken(user.getUsername(), user.getRole());
-        return new AuthResponse(newAccessToken, token.getToken(), user.getRole());
+        return new AuthResponse(newAccessToken, token.getToken(), user.getRole(),user.getId());
         }
         else{
             return null;

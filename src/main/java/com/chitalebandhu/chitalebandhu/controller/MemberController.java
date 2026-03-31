@@ -25,6 +25,11 @@ public class MemberController {
         return memberService.getAllMembers();
     }
 
+    @GetMapping("username/{userName}")
+    public String getMemberUserName(@PathVariable String userName){
+        return memberService.getMemberUserName(userName);
+    }
+
     @PostMapping
     public void addMember(@RequestBody Member member){
         memberService.addMember(member);

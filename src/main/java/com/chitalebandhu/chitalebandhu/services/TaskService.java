@@ -445,16 +445,14 @@ public class TaskService {
             }
     }
     public void addRemark(String id, Remark remark){
-        System.out.println("inside add remark");
         Optional <Tasks> existingTask = taskRepository.findById(id);
         remark.setId(UUID.randomUUID().toString());
+
         if(existingTask.isPresent()){
-            System.out.println("good");
                 existingTask.get().addRemark(remark);
                 taskRepository.save(existingTask.get());
         }
         else{
-            System.out.println("failed");
             throw new IllegalStateException("Failed to send message");
         }
     }
@@ -535,22 +533,30 @@ public class TaskService {
                 .orElse(actorId);
     }
 
-    public List<Remark> getAllremarks(String id){
-        Optional<Tasks> task = taskRepository.findById(id);
-        if(task.isPresent()){
-            List<Remark> remarks =  task.get().getRemarks();
-            for (int i = 0 ; i<  remarks.size() ; i++){
-                Remark remark = remarks.get(i);
-                Optional<Member> member = memberRepository.findById(remark.getSenderId());
-                if (member.isPresent()){
-                    remarks.get(i).setSenderName(member.get().getName());
-                }else {
-                    throw new RuntimeException("No member found may be deleted");
-                }
-            }
-            return remarks;
-        }else {
-            throw  new ResourceNotFoundException("No remarks found");
+    public List<Remark> getAllremarks(String id) {
+
+        Tasks task = taskRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No remarks found"));
+
+        List<Remark> remarks = task.getRemarks();
+
+        if (remarks == null || remarks.isEmpty()) {
+            return new ArrayList<>();
         }
+
+        for (Remark remark : remarks) {
+
+            if (remark.getSenderId() == null) continue;
+
+            Optional<Member> member = memberRepository.findById(remark.getSenderId());
+
+            if (member.isPresent()) {
+                remark.setSenderName(member.get().getName());
+            } else {
+                remark.setSenderName("Unknown User"); // optional safety
+            }
+        }
+
+        return remarks;
     }
 }

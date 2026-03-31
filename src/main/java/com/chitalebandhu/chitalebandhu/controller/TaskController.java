@@ -175,7 +175,6 @@ public class TaskController {
         System.out.println(remark.getSenderId());
         System.out.println(id);
         taskService.addRemark(id ,remark);
-
     }
 
 
@@ -183,13 +182,12 @@ public class TaskController {
     @GetMapping("getAllRemarks/{id}")
     public List<Remark> getAllRemarks(@PathVariable String id){
         List<Remark> remarks = taskService.getAllremarks(id);
-
         return remarks;
     }
 
 
 
-    @DeleteMapping("collaboratedProject/remove/{id}")
+    @PostMapping("collaboratedProject/remove/{id}")
     public void removeCollaboratedProject(@PathVariable String id, @RequestBody String projectId){
         taskService.removeCollaboratedProject(id, projectId);
     }

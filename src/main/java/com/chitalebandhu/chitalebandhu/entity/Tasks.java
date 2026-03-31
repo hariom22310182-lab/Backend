@@ -200,6 +200,7 @@ public class Tasks {
     }
 
     public void removeCollaboratedProjects(String id){
+        System.out.println(id);
         collaboratedProjects.remove(id);
     }
 
