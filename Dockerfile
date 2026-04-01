@@ -2,8 +2,11 @@ FROM eclipse-temurin:17-jdk-jammy
 
 WORKDIR /app
 
-COPY target/*.jar app.jar
+# Copy full project
+COPY . .
 
-EXPOSE 8080
+# Build project inside container
+RUN ./mvnw clean package -DskipTests
 
-ENTRYPOINT ["java","-jar","app.jar"]
+# Run the generated jar
+CMD ["java", "-jar", "target/management-system-0.0.1-SNAPSHOT.jar"]
