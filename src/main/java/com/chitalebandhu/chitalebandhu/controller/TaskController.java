@@ -173,7 +173,8 @@ public class TaskController {
     public  boolean checkForSubmit(@PathVariable String id){
         List<Tasks> tasks = getDependency(id);
         for(Tasks task : tasks){
-            if(task.getStatus() != "DONE"){
+            if(!task.getStatus().equals("DONE")){
+            System.out.println(task.getStatus());
                 return  false;
             }
         }
