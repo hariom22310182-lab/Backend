@@ -94,7 +94,7 @@ public class TaskService {
 
         final String parentId = existing.getParentId();
 
-        List<Tasks> children = getTasksByParentId(id);
+        List<Tasks> children = taskRepository.findByParentId(id);
         if(!children.isEmpty()){
             for (Tasks child : children) {
                 deleteTaskById(child.getId());
