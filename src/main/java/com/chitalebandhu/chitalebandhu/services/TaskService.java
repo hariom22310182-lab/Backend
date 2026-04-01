@@ -277,7 +277,6 @@ public class TaskService {
     }
     public List<Tasks> getTasksByParentId(String parentId){
         List<Tasks> tasks = taskRepository.findByParentId(parentId);
-
         if(!tasks.isEmpty()){
             return tasks;
         }else {
