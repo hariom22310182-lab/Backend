@@ -380,6 +380,7 @@ public class TaskService {
         Deque<String> queue = new ArrayDeque<>();
         List<Tasks> toDelete = new ArrayList<>();
         queue.add(rootParentId);
+        activityRepository.deleteByProjectId(rootParentId);
 
         Optional<Tasks> parent = taskRepository.findById(rootParentId);
         parent.ifPresent(toDelete::add);
@@ -395,6 +396,7 @@ public class TaskService {
             for (Tasks child : children) {
                 if (child.getId() != null && !child.getId().trim().isEmpty()) {
                     queue.add(child.getId());
+                    activityRepository.deleteByProjectId(child.getId());
                 }
             }
         }

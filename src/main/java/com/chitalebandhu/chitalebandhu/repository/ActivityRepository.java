@@ -8,5 +8,6 @@ import java.util.List;
 public interface ActivityRepository extends MongoRepository<Activity, String> {
     List<Activity> findAllByOrderByTimeDesc();
     List<Activity> findByVisibilityOrderByTimeDesc(String visibility);
+    void deleteByProjectId(String projectId);
     List<Activity> findByProjectIdInAndVisibilityOrderByTimeDesc(List<String> projectIds, String visibility);
 }
