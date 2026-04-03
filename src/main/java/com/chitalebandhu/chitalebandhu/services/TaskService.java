@@ -95,7 +95,9 @@ public class TaskService {
             if(Objects.equals(task.getStatus(), "NOT_STARTED") || Objects.equals(task.getStatus(), "REVIEW")){
                 parentTask.setRemainingTask(parentTask.getRemainingTask() - 1);
             }
-            parentTask.setCompletedTask(parentTask.getCompletedTask() - 1);
+            if(Objects.equals(task.getStatus(), "DONE")){
+                parentTask.setCompletedTask(parentTask.getCompletedTask() - 1);
+            }
         }
         deleteDescendantsByParentId(id);
     }
