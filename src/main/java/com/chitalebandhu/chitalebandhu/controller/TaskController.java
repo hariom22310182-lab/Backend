@@ -83,6 +83,7 @@ public class TaskController {
             }
 
             List<String> projectIds = task.getCollaboratedProjects();
+            projectIds.add(id);
             Map<String, List<Tasks>> result = new HashMap<>();
 
             for (String projectId : projectIds) {
