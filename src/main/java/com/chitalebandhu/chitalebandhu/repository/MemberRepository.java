@@ -11,7 +11,8 @@ import java.util.Optional;
 
 public interface MemberRepository extends MongoRepository<Member , String> {
 	List<Member> findByRoleIgnoreCase(String role);
-	Optional<Member> findByEmail(String email);
+	Optional<Member> findFirstByEmailIgnoreCase(String email);
+	boolean existsByEmailIgnoreCase(String email);
 
 	// Pagination method
 	Page<Member> findByRoleIgnoreCase(String role, Pageable pageable);

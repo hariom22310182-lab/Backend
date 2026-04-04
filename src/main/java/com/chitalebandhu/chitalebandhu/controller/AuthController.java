@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -46,6 +47,31 @@ public class AuthController {
 
     @PostMapping("/register")
     public User register(@RequestBody User user) {
+        String username = user.getUsername() == null ? "" : user.getUsername().trim();
+        if (username.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username is required");
+        }
+
+        if (memberRepository.existsByEmailIgnoreCase(username)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "An employee with this email already exists");
+        }
+
+        User existingUser = userRepository.findFirstByUsernameIgnoreCase(username).orElse(null);
+        if (existingUser != null) {
+            if (existingUser.getRole() != null && !existingUser.getRole().trim().isEmpty()
+                    && !"USER".equalsIgnoreCase(existingUser.getRole().trim())) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
+            }
+
+            existingUser.setUsername(username);
+            existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
+            if (user.getRole() != null && !user.getRole().trim().isEmpty()) {
+                existingUser.setRole(user.getRole().trim());
+            }
+            return userRepository.save(existingUser);
+        }
+
+        user.setUsername(username);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
@@ -58,20 +84,22 @@ public class AuthController {
                     request.getPassword()
             )
         );
-        if(userRepository.findByUsername(request.getUsername()).isPresent()){
-            User user = userRepository.findByUsername(request.getUsername()).get();
-            String accessToken = jwtUtil.generateAccessToken(user.getUsername(), user.getRole());
-            String refreshToken = refreshTokenService.createRefreshToken(user.getUsername()).getToken();
 
-            Optional<Member> member = memberRepository.findByEmail(request.getUsername());
-            if(member.isPresent()){
-                return new AuthResponse(accessToken, refreshToken, user.getRole() ,member.get().getId());
-            }
+        String username = request.getUsername() == null ? "" : request.getUsername().trim();
 
-            System.out.println("sending usr id " + user.getId());
-            return new AuthResponse(accessToken, refreshToken, user.getRole() ,user.getId());
+        User user = userRepository.findFirstByUsernameIgnoreCase(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        String accessToken = jwtUtil.generateAccessToken(user.getUsername(), user.getRole());
+        String refreshToken = refreshTokenService.createRefreshToken(user.getUsername()).getToken();
+
+        Optional<Member> member = memberRepository.findFirstByEmailIgnoreCase(username);
+        if(member.isPresent()){
+            return new AuthResponse(accessToken, refreshToken, user.getRole() ,member.get().getId());
         }
-        return null;
+
+        System.out.println("sending usr id " + user.getId());
+        return new AuthResponse(accessToken, refreshToken, user.getRole() ,user.getId());
     }
 
     @PostMapping("/refresh")
@@ -107,7 +135,7 @@ public class AuthController {
             return new ResponseEntity<>("All fields are required", HttpStatus.BAD_REQUEST);
         }
 
-        var userOpt = userRepository.findByUsername(request.getUsername());
+        var userOpt = userRepository.findFirstByUsernameIgnoreCase(request.getUsername().trim());
         if (userOpt.isEmpty()) {
             return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
         }

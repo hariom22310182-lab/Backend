@@ -32,10 +32,6 @@ public class MemberService {
     @Autowired
     private TaskRepository taskRepository;
 
-    public void addMember(Member member){
-        memberRepository.save(member);
-    }
-
     public List<Member> getAllMembers(){
         return memberRepository.findByRoleIgnoreCase("USER");
     }
@@ -49,8 +45,22 @@ public class MemberService {
         return memberRepository.findById(myId).orElseThrow(() -> new ResourceNotFoundException("Member not found with id: " + myId));
     }
     public String getMemberUserName(String username){
-       User member =  userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("Member not found with username: " + username));
+         User member =  userRepository.findFirstByUsernameIgnoreCase(username).orElseThrow(() -> new ResourceNotFoundException("Member not found with username: " + username));
        return member.getId();
+    }
+
+    public void addMember(Member member){
+        String email = safe(member.getEmail());
+        if (email.isEmpty()) {
+            throw new IllegalArgumentException("Employee email is required");
+        }
+
+        if (memberRepository.existsByEmailIgnoreCase(email)) {
+            throw new IllegalStateException("An employee with this email already exists");
+        }
+
+        member.setEmail(email);
+        memberRepository.save(member);
     }
 
 
@@ -82,6 +92,14 @@ public class MemberService {
                 "Cannot delete member \"" + existingMember.getName() +
                     "\". They still have " + activeTasks + " incomplete task(s)."
             );
+        }
+
+        String linkedEmail = safe(existingMember.getEmail());
+        List<User> linkedUsers = linkedEmail.isEmpty()
+            ? List.of()
+            : userRepository.findAllByUsernameIgnoreCase(linkedEmail);
+        if (!linkedUsers.isEmpty()) {
+            userRepository.deleteAll(linkedUsers);
         }
 
         // Keep historical tasks/projects but remove dangling owner reference.
