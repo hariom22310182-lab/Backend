@@ -89,17 +89,32 @@ public class TaskService {
     }
 
     public void deleteTaskById(String id){
+        if (id == null || id.trim().isEmpty()) {
+            throw new IllegalArgumentException("Task id is required for deletion");
+        }
+
         Tasks task = getTaskById(id);
-        Tasks parentTask = getTaskById(task.getParentId());
-        if(!task.getParentId().isEmpty()){
-            if(Objects.equals(task.getStatus(), "NOT_STARTED") || Objects.equals(task.getStatus(), "REVIEW")){
-                parentTask.setRemainingTask(parentTask.getRemainingTask() - 1);
-            }
-            if(Objects.equals(task.getStatus(), "DONE")){
-                parentTask.setCompletedTask(parentTask.getCompletedTask() - 1);
+        String parentId = task.getParentId();
+
+        if (parentId != null && !parentId.trim().isEmpty()) {
+            Optional<Tasks> parentTaskOpt = taskRepository.findById(parentId);
+            if (parentTaskOpt.isPresent()) {
+                Tasks parentTask = parentTaskOpt.get();
+
+                if (Objects.equals(task.getStatus(), "NOT_STARTED")
+                        || Objects.equals(task.getStatus(), "REVIEW")
+                        || Objects.equals(task.getStatus(), "TODO")) {
+                    parentTask.setRemainingTask(Math.max(0, parentTask.getRemainingTask() - 1));
+                }
+                if (Objects.equals(task.getStatus(), "DONE")) {
+                    parentTask.setCompletedTask(Math.max(0, parentTask.getCompletedTask() - 1));
+                }
+
+                taskRepository.save(parentTask);
+                recalculateProjectStats(parentId);
             }
         }
-        taskRepository.save(parentTask);
+
         deleteDescendantsByParentId(id);
     }
 
