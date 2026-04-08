@@ -121,11 +121,9 @@ public class TaskController {
         taskService.toggleType(id);
     }
 
-
-
-    @DeleteMapping("delete/{id}")
-    public void deleteTask(@PathVariable("id") String id){
-        taskService.deleteTaskById(id);
+    @DeleteMapping("delete/{id}/{isAdmin}")
+    public void deleteTask(@PathVariable("id") String id, @PathVariable boolean isAdmin){
+        taskService.deleteTaskById(id, isAdmin);
     }
 
     @PutMapping("{id}/status/update/{status}")

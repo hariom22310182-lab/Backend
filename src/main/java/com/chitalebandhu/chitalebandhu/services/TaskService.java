@@ -174,20 +174,29 @@ public class TaskService {
         return syncAndPersistLifecycleStatus(tasks.orElse(List.of()));
     }
 
-    public void deleteTaskById(String id){
+    public void deleteTaskById(String id, boolean isAdmin){
         if (id == null || id.trim().isEmpty()) {
             throw new IllegalArgumentException("Task id is required for deletion");
         }
 
-        Tasks task = getTaskById(id);
-        String parentId = task.getParentId();
-        boolean isProjectRoot = "PROJECT".equals(normalize(task.getType()))
-            && (parentId == null || parentId.trim().isEmpty());
+        Optional<Tasks> taskOpt = taskRepository.findById(id);
+        if (taskOpt.isEmpty()) {
+            // Deletion should be idempotent: if already removed, treat as success.
+            return;
+        }
 
-        if (isProjectRoot) {
-            // Keep deletion activity visible to admins even after task hierarchy is removed.
-            logActivity(task, task.getOwnerId(), "deleted project", VISIBILITY_PROJECT,
-                null, task.getTitle());
+        Tasks task = taskOpt.get();
+        String parentId = task.getParentId();
+
+        if(!isAdmin){
+            boolean isProjectRoot = "PROJECT".equals(normalize(task.getType()))
+                && (parentId == null || parentId.trim().isEmpty());
+
+            if (isProjectRoot) {
+                // Keep deletion activity visible to admins even after task hierarchy is removed.
+                logActivity(task, task.getOwnerId(), "deleted project", VISIBILITY_PROJECT,
+                    null, task.getTitle());
+            }
         }
 
         if (parentId != null && !parentId.trim().isEmpty()) {
@@ -195,20 +204,17 @@ public class TaskService {
             if (parentTaskOpt.isPresent()) {
                 Tasks parentTask = parentTaskOpt.get();
 
-                if (Objects.equals(task.getStatus(), "NOT_STARTED")
-                        || Objects.equals(task.getStatus(), "REVIEW")
-                        || Objects.equals(task.getStatus(), "TODO")) {
-                    parentTask.setRemainingTask(Math.max(0, parentTask.getRemainingTask() - 1));
-                }
                 if (Objects.equals(task.getStatus(), "DONE")) {
                     parentTask.setCompletedTask(Math.max(0, parentTask.getCompletedTask() - 1));
+                }
+                else{
+                    parentTask.setRemainingTask(Math.max(0, parentTask.getRemainingTask() - 1));
                 }
 
                 taskRepository.save(parentTask);
                 recalculateProjectStats(parentId);
             }
         }
-
         deleteDescendantsByParentId(id);
     }
 
