@@ -21,6 +21,7 @@ public class Tasks {
     private String type; // PROJECT / TASK
     private String status; // NOT_STARTED / IN_PROGRESS / DONE / OVERDUE
     private String ownerId;
+    private String creatorId; // Tracks who created this task/project (for activity logging)
     private String parentId;
     private List<String> collaboratedProjects = new ArrayList<>();
     private List<String> dependencies = new ArrayList<>();
@@ -93,6 +94,14 @@ public class Tasks {
 
     public void setOwnerId(String ownerId) {
         this.ownerId = ownerId;
+    }
+
+    public String getCreatorId() {
+        return creatorId;
+    }
+
+    public void setCreatorId(String creatorId) {
+        this.creatorId = creatorId;
     }
 
     public String getPriority() {

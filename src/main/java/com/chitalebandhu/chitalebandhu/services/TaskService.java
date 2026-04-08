@@ -148,8 +148,15 @@ public class TaskService {
         Tasks savedTask = taskRepository.save(task);
 
         if ("PROJECT".equals(normalize(savedTask.getType()))) {
-            logActivity(savedTask, savedTask.getOwnerId(), "created project", VISIBILITY_PROJECT,
-                    savedTask.getId(), savedTask.getTitle());
+            // Log project creation only when creator and owner are the same user.
+            // This prevents admin-created projects from generating a creation activity.
+            String creatorId = savedTask.getCreatorId();
+            if (creatorId != null
+                    && creatorId.equals(savedTask.getOwnerId())
+                    && !isAdminActor(creatorId)) {
+                logActivity(savedTask, creatorId, "created project", VISIBILITY_PROJECT,
+                        savedTask.getId(), savedTask.getTitle());
+            }
         }
 
         if (savedTask.getParentId() != null && !savedTask.getParentId().trim().isEmpty()) {
@@ -734,6 +741,24 @@ public class TaskService {
                 .filter(name -> name != null && !name.trim().isEmpty())
                 .findFirst()
                 .orElse(actorId);
+    }
+
+    private boolean isAdminActor(String actorId) {
+        if (actorId == null || actorId.trim().isEmpty()) {
+            return false;
+        }
+
+        Optional<Member> memberById = memberRepository.findById(actorId);
+        if (memberById.isPresent()) {
+            return "ADMIN".equalsIgnoreCase(normalize(memberById.get().getRole()));
+        }
+
+        return memberRepository.findAll()
+                .stream()
+                .filter(m -> m.getEmail() != null && m.getEmail().equalsIgnoreCase(actorId))
+                .findFirst()
+                .map(member -> "ADMIN".equalsIgnoreCase(normalize(member.getRole())))
+                .orElse(false);
     }
 
     public List<Remark> getAllRemarks(String id) {
