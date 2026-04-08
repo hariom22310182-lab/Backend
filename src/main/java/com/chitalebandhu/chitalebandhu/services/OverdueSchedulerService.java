@@ -18,9 +18,11 @@ public class OverdueSchedulerService {
     private static final List<String> EXCLUDED_STATUSES = Arrays.asList("DONE", "COMPLETED", "OVERDUE");
 
     private final TaskRepository taskRepository;
+    private final TaskService taskService;
 
-    public OverdueSchedulerService(TaskRepository taskRepository) {
+    public OverdueSchedulerService(TaskRepository taskRepository, TaskService taskService) {
         this.taskRepository = taskRepository;
+        this.taskService = taskService;
     }
 
     /**
@@ -44,6 +46,7 @@ public class OverdueSchedulerService {
         for (Tasks task : overdueTasks) {
             task.setStatus("OVERDUE");
             taskRepository.save(task);
+            taskService.createOverdueActivity(task);
             updatedCount++;
             logger.debug("Marked task/project '{}' (ID: {}) as OVERDUE", task.getTitle(), task.getId());
         }
