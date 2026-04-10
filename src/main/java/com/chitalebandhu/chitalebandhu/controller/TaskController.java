@@ -6,6 +6,7 @@ import com.chitalebandhu.chitalebandhu.entity.Remark;
 import com.chitalebandhu.chitalebandhu.entity.Tasks;
 import com.chitalebandhu.chitalebandhu.services.TaskService;
 import com.chitalebandhu.chitalebandhu.services.OverdueSchedulerService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,13 +19,10 @@ import java.util.*;
 @RequestMapping("tasks")
 public class TaskController {
 
-    private final TaskService taskService;
-    private final OverdueSchedulerService overdueSchedulerService;
-
-    public TaskController(TaskService taskService, OverdueSchedulerService overdueSchedulerService) {
-        this.taskService = taskService;
-        this.overdueSchedulerService = overdueSchedulerService;
-    }
+    @Autowired
+    private TaskService taskService;
+    @Autowired
+    private OverdueSchedulerService overdueSchedulerService;
 
     @GetMapping("count/{priority}")
     public long getCountByPriority(@PathVariable String priority){
@@ -182,6 +180,7 @@ public class TaskController {
     public void addCollaboratedProject(@PathVariable String id, @RequestBody String projectId){
         taskService.addCollaboratedProject(id, projectId);
     }
+
     @PostMapping("remark/add/{id}")
     public void addRemark(@PathVariable String id , @RequestBody Remark remark){
         remark.setTime(LocalDateTime.now());
@@ -190,14 +189,10 @@ public class TaskController {
         taskService.addRemark(id ,remark);
     }
 
-
-
     @GetMapping("getAllRemarks/{id}")
     public List<Remark> getAllRemarks(@PathVariable String id){
         return taskService.getAllRemarks(id);
     }
-
-
 
     @PostMapping("collaboratedProject/remove/{id}")
     public void removeCollaboratedProject(@PathVariable String id, @RequestBody String projectId){

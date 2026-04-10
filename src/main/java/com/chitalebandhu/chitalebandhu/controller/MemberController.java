@@ -45,21 +45,6 @@ public class MemberController {
         return memberService.getProjectCount(ownerId, type);
     }
 
-    @GetMapping("notification/{memberId}")
-    public List<Notification> getNotification(@PathVariable String memberId){
-        return memberService.getNotification(memberId);
-    }
-
-    @PutMapping("notification/add/{memberId}")
-    public void addNotification(@PathVariable String memberId, @RequestBody Notification notification){
-        memberService.addNotification(memberId, notification);
-    }
-
-    @DeleteMapping("notification/remove/{memberId}")
-    public void removeNotification(@PathVariable String memberId, @RequestBody Notification notification){
-        memberService.removeNotification(memberId, notification);
-    }
-
     @GetMapping("{ownerId}/projects/{status}/count")
     public long getCountByStatus(@PathVariable String ownerId, @PathVariable String status){
         return memberService.getStatusCount(ownerId, status);

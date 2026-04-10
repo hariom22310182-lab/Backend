@@ -1,19 +1,18 @@
 package com.chitalebandhu.chitalebandhu.services;
 
-import com.chitalebandhu.chitalebandhu.entity.Remark;
-import com.chitalebandhu.chitalebandhu.entity.Tasks;
-import com.chitalebandhu.chitalebandhu.entity.Activity;
-import com.chitalebandhu.chitalebandhu.entity.Member;
+import com.chitalebandhu.chitalebandhu.entity.*;
 import com.chitalebandhu.chitalebandhu.exceptions.ResourceNotFoundException;
 import com.chitalebandhu.chitalebandhu.repository.TaskRepository;
 import com.chitalebandhu.chitalebandhu.repository.ActivityRepository;
 import com.chitalebandhu.chitalebandhu.repository.MemberRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
@@ -21,29 +20,27 @@ public class TaskService {
 
     private static final List<String> DONE_STATUSES = Arrays.asList("DONE", "COMPLETED");
 
-    private final TaskRepository taskRepository;
-    private final ActivityRepository activityRepository;
-    private final MemberRepository memberRepository;
+    @Autowired
+    private TaskRepository taskRepository;
+    @Autowired
+    private ActivityRepository activityRepository;
+    @Autowired
+    private MemberRepository memberRepository;
+    @Autowired
+    private NotificationService notificationService;
 
     private static final String VISIBILITY_PROJECT = "PROJECT";
     private static final String VISIBILITY_TASK = "TASK";
 
-    public TaskService(
-            TaskRepository taskRepository,
-            ActivityRepository activityRepository,
-            MemberRepository memberRepository
-    ) {
-        this.taskRepository = taskRepository;
-        this.activityRepository = activityRepository;
-        this.memberRepository = memberRepository;
-    }
-
     private boolean isDeadlineCrossed(Tasks task) {
-        return task.getDeadline() != null && task.getDeadline().isBefore(java.time.LocalDate.now());
+        if(task.getDeadline() == null){
+            throw new RuntimeException("TaskService > isDeadlineCrossed > the task doesn't have deadline");
+        }
+        return task.getDeadline().isBefore(java.time.LocalDate.now());
     }
 
     private String resolveProjectStatus(Tasks project) {
-        if (project.getProgress() >= 100) {
+        if (project.getProgress() == 100) {
             return "DONE";
         }
 
@@ -145,6 +142,9 @@ public class TaskService {
             }
         }
         syncLifecycleStatus(task);
+
+        //Setting Critical days as 10% of actual time
+        task.setCriticalDays((int) Math.ceil(ChronoUnit.DAYS.between(task.getStartDate(), task.getDeadline()) * 0.10));
         //Added new task
         Tasks savedTask = taskRepository.save(task);
 
@@ -163,9 +163,27 @@ public class TaskService {
         if (savedTask.getParentId() != null && !savedTask.getParentId().trim().isEmpty()) {
             recalculateProjectStats(savedTask.getParentId());
         }
+
+        //Send notification to creator
+        String message;
+
+        if(savedTask.getType().equals("TASK")){
+            message = "New Task '"+ savedTask.getTitle() + "' is assigned to you.";
+        }
+        else{
+            message = "New Project '"+ savedTask.getTitle() + "' is assigned to you.";
+        }
+
+        Notification newNotification = new Notification();
+        newNotification.setMessage(message);
+        newNotification.setTime(java.time.LocalDateTime.now());
+        newNotification.setUserId(savedTask.getOwnerId());
+        newNotification.setIsRead(false);
+        newNotification.setHelperId(savedTask.getId());
+        newNotification.setEventType("NEW_TASK_CREATION");
+
+        notificationService.addNotification(newNotification);
     }
-
-
 
     public Tasks getTaskById(String id){
         Tasks task = taskRepository.findById(id)
@@ -629,8 +647,20 @@ public class TaskService {
         remark.setId(UUID.randomUUID().toString());
 
         if(existingTask.isPresent()){
-                existingTask.get().addRemark(remark);
-                taskRepository.save(existingTask.get());
+            existingTask.get().addRemark(remark);
+            taskRepository.save(existingTask.get());
+
+            //creating notification
+            Notification newNotification = new Notification();
+
+            newNotification.setMessage(remark.getSenderName() + " Added remark in " + existingTask.get().getTitle());
+            newNotification.setTime(java.time.LocalDateTime.now());
+            newNotification.setUserId(existingTask.get().getOwnerId());
+            newNotification.setIsRead(false);
+            newNotification.setEventType("REMARK_SECTION");
+            newNotification.setHelperId(existingTask.get().getId());
+
+            notificationService.addNotification(newNotification);
         }
         else{
             throw new IllegalStateException("Failed to send message");
