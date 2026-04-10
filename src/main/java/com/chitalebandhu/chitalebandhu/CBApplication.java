@@ -17,7 +17,7 @@ public class CBApplication {
 //	@Bean
 //	CommandLineRunner runner(MemberRepository repository){
 //	 return args -> {
-//		 Member m = new Member();v
+//		 Member m = new Member();
 //		 m.setName("Yash");
 //		 repository.save(m);
 //		 System.out.println("Saved to mongodb "+ m.getName());

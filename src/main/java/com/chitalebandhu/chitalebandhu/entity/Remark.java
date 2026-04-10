@@ -10,15 +10,11 @@ public class Remark {
 
     @Id
     private String id;
-
     private String senderName;
     private String senderId;
-
     private List<String> mentionedUserId = new ArrayList<>();
-
     private String message;
     private LocalDateTime time;
-
 
     public String getId() {
         return id;
@@ -32,7 +28,6 @@ public class Remark {
         return senderId;
     }
 
-    // 🔥 FIXED HERE
     public void setSenderId(String senderId) {
         this.senderId = senderId;
     }

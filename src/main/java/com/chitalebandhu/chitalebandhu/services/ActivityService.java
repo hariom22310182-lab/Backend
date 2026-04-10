@@ -46,7 +46,7 @@ public class ActivityService {
             existingActivity.get().setVerb(newActivity.getVerb());
         }
         if(newActivity.getTime() != null){
-            existingActivity.get().setTime();
+            existingActivity.get().setTime(newActivity.getTime());
         }
 
         return activityRepository.save(existingActivity.get());

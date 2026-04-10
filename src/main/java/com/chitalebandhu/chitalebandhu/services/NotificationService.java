@@ -1,0 +1,59 @@
+package com.chitalebandhu.chitalebandhu.services;
+import com.chitalebandhu.chitalebandhu.entity.Notification;
+import com.chitalebandhu.chitalebandhu.repository.NotificationRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class NotificationService {
+    @Autowired
+    private NotificationRepository notificationRepository;
+
+    public List<Notification> getNotificationByUserId(String id){
+        Optional<List<Notification>> exisitingNotifications =  notificationRepository.findByUserId(id);
+        if(exisitingNotifications.isPresent()){
+            return exisitingNotifications.get();
+        }
+        else{
+            throw new RuntimeException("NotificationService > getNotificationByUserId > No notifications found");
+        }
+    }
+
+    public void addNotification(Notification newNotification){
+        notificationRepository.save(newNotification);
+    }
+
+    public void deleteNotificationById(String id){
+        notificationRepository.deleteById(id);
+    }
+
+    public void updateNotificationById(String id, Notification newNotification){
+        Optional<Notification> exisitingNotification = notificationRepository.findById(id);
+        if(exisitingNotification.isPresent()){
+            if(newNotification.getIsRead() != null){
+                exisitingNotification.get().setIsRead(newNotification.getIsRead());
+            }
+            if(newNotification.getUserId() != null && !newNotification.getUserId().isEmpty()){
+                exisitingNotification.get().setUserId(newNotification.getUserId());
+            }
+            if(newNotification.getEventType() != null && !newNotification.getEventType().isEmpty()){
+                exisitingNotification.get().setEventType(newNotification.getEventType());
+            }
+            if(newNotification.getTime() != null){
+                exisitingNotification.get().setTime(newNotification.getTime());
+            }
+            if(newNotification.getMessage() != null && !newNotification.getMessage().isEmpty()){
+                exisitingNotification.get().setMessage(newNotification.getMessage());
+            }
+            if(newNotification.getHelperId() != null && !newNotification.getHelperId().isEmpty()){
+                exisitingNotification.get().setHelperId(newNotification.getHelperId());
+            }
+        }
+        else{
+            throw new RuntimeException("NotificationService > updateNotificationById > ExisitingNotification is not present");
+        }
+    }
+}

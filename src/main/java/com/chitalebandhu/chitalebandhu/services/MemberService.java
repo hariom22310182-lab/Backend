@@ -26,7 +26,6 @@ public class MemberService {
 
     @Autowired
     private MemberRepository memberRepository;
-
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -122,22 +121,6 @@ public class MemberService {
 
     public long getStatusCount(String ownerId, String status){
         return taskRepository.countByOwnerIdAndStatus(ownerId, status);
-    }
-
-    public void addNotification(String ownerId, Notification notification){
-        Member member = getMemberById(ownerId);
-        member.addNotification(notification);
-        memberRepository.save(member);
-    }
-
-    public List<Notification> getNotification(String ownerId){
-        return getMemberById(ownerId).getNotifications();
-    }
-
-    public void removeNotification(String ownerId, Notification notification){
-        Member member = getMemberById(ownerId);
-        member.removeNotification(notification);
-        memberRepository.save(member);
     }
 
     public Member updateMemberById(String myId, Member newMember){

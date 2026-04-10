@@ -3,8 +3,7 @@ package com.chitalebandhu.chitalebandhu.entity;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Document(collection = "activity")
 public class Activity {
@@ -14,7 +13,7 @@ public class Activity {
     private String userName; // Ram, sham
     private String verb; // created, started, completed, deleted, submitted review
     private String projectName; // Improving the marketing strategy
-    private LocalDateTime time;
+    private Instant time;
     private String visibility; // Set visibility as Task / Project - Tasks with Visibility as Task will only be seen by team leader and visibility with Project will be seen by admin only
     // final activity = Ram created Improving the marketing strategy - 2 hours/days/months ago
 
@@ -42,12 +41,16 @@ public class Activity {
         this.projectName = projectName;
     }
 
-    public LocalDateTime getTime() {
+    public Instant getTime() {
         return time;
     }
 
-    public void setTime() {
-        this.time = LocalDateTime.now();
+    public void setTime(Instant time) {
+        this.time = time;
+    }
+
+    public void setCurrentTimeUtc() {
+        this.time = Instant.now();
     }
 
     public String getProjectId() {
