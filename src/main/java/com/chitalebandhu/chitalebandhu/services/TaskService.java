@@ -380,6 +380,7 @@ public class TaskService {
         if ("REVIEW".equals(nextStatus)) {
             task.setStatus("REVIEW");
             newNotification.setMessage((task.getType().equals("TASK") ? "TASK" : "PROJECT") + " '" + task.getTitle() + "' is sent to review by " + member.getName());
+            newNotification.setHelperId(task.getParentId());
             createTransitionActivity(task, actorId, "submitted for review in");
         }
         else if ("IN_PROGRESS".equals(nextStatus)) {
@@ -388,6 +389,7 @@ public class TaskService {
             }
             task.setStatus("IN_PROGRESS");
             newNotification.setMessage((task.getType().equals("TASK") ? "TASK" : "PROJECT") + " '" + task.getTitle() + "' is disapproved by " + member.getName());
+            newNotification.setHelperId(id);
             createTransitionActivity(task, actorId, "disapproved review for");
         } else if (DONE_STATUSES.contains(nextStatus)) {
             // Completion is allowed only from REVIEW and only by project owner or admin.
@@ -397,6 +399,7 @@ public class TaskService {
 
             task.setStatus("DONE");
             newNotification.setMessage((task.getType().equals("TASK") ? "TASK" : "PROJECT") + " '" + task.getTitle() + "' is approved by " + member.getName());
+            newNotification.setHelperId(id);
             createTransitionActivity(task, actorId, "approved completion for");
         } else {
             throw new IllegalStateException("Unsupported transition status: " + nextStatus + ". Use REVIEW, TODO, or DONE.");
@@ -412,7 +415,7 @@ public class TaskService {
         newNotification.setEventType("REVIEW_REQUEST");
         newNotification.setTime(LocalDateTime.now());
         newNotification.setUserId(actorId);
-        newNotification.setHelperId(id);
+
         newNotification.setIsRead(false);
         newNotification.setDeleted(false);
         notificationService.addNotification(newNotification);
