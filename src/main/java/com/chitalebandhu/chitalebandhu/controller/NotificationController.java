@@ -18,7 +18,7 @@ public class NotificationController {
         return notificationService.getNotificationByUserId(id);
     }
 
-    @PutMapping("softDelete/{id}")
+    @DeleteMapping ("softDelete/{id}")
     public void softDelete(@PathVariable String id){
         notificationService.softDelete(id);
     }

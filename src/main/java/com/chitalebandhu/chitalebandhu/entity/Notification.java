@@ -24,6 +24,14 @@ public class Notification {
     private String helperId;
     private boolean isDeleted;
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public String getMessage() {
         return message;
     }

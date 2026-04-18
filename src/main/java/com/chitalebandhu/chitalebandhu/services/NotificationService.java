@@ -13,7 +13,7 @@ public class NotificationService {
     private NotificationRepository notificationRepository;
 
     public List<Notification> getNotificationByUserId(String id){
-        Optional<List<Notification>> exisitingNotifications =  notificationRepository.findByUserId(id);
+        Optional<List<Notification>> exisitingNotifications =  notificationRepository.findByUserIdAndIsDeleted(id, false);
         if(exisitingNotifications.isPresent()){
             return exisitingNotifications.get();
         }
@@ -62,6 +62,7 @@ public class NotificationService {
             if(newNotification.getHelperId() != null && !newNotification.getHelperId().isEmpty()){
                 exisitingNotification.get().setHelperId(newNotification.getHelperId());
             }
+            notificationRepository.save(exisitingNotification.get());
         }
         else{
             throw new RuntimeException("NotificationService > updateNotificationById > ExisitingNotification is not present");
